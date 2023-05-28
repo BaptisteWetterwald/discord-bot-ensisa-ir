@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database/bot-discord-db.sqlite');
-const { channelId } = require('../../config.json');
+const { mainChannel } = require('../../ids/channels-id.json');
 
 module.exports = {
     checkForAbsences,
@@ -91,62 +91,61 @@ module.exports = {
 };
 
 async function checkForAbsences(message) {
-	if (channelId.includes(message.channel.id)) {
-		if (
-			message.content.split(" ").length != 1 ||
-			(!message.content.endsWith("++") && !message.content.endsWith("--"))
-		)
-			return message.reply("Utilisation : <nom>++");
-		let name = message.content.slice(0, -2).toLowerCase();
-		let score = -1;
-		db.get(
-			"SELECT score FROM absences WHERE LOWER(name)=?",
-			[name],
-			(error, row) => {
-				if (error) {
-					console.log(error);
-					return message.reply("Erreur lors de la requête");
-				}
-				if (row) {
-					if (message.content.endsWith("++")) {
-						score = row.score + 1;
-					} else if (message.content.endsWith("--")) {
-						score = row.score - 1;
-						if (score < 0) score = 0;
-					} else
-						return message.reply(
-							"Erreur lors de la modification du score"
-						);
+	if (mainChannel != message.channel.id) return;
+    if (
+        message.content.split(" ").length != 1 ||
+        (!message.content.endsWith("++") && !message.content.endsWith("--"))
+    ) return message.reply("Utilisation : <nom>++");
 
-					db.run(
-						"UPDATE absences SET score=? WHERE LOWER(name)=?",
-						[score, name],
-						(error) => {
-							if (error) {
-								console.log(error);
-								return message.reply(
-									"Erreur lors de la requête"
-								);
-							}
-							return message.reply(
-								(message.content.endsWith("++")
-									? "Une nouvelle absence pour "
-									: "Une absence de moins pour ") +
-									name +
-									" ! Nouveau score : " +
-									score +
-									" absence(s)"
-							);
-						}
-					);
-				} else
-					return message.reply(
-						"Ce participant n'existe pas, utilise /absences new " +
-							name
-					);
-			}
-		);
-	}
+    let name = message.content.slice(0, -2).toLowerCase();
+    let score = -1;
+    db.get(
+        "SELECT score FROM absences WHERE LOWER(name)=?",
+        [name],
+        (error, row) => {
+            if (error) {
+                console.log(error);
+                return message.reply("Erreur lors de la requête");
+            }
+            if (row) {
+                if (message.content.endsWith("++")) {
+                    score = row.score + 1;
+                } else if (message.content.endsWith("--")) {
+                    score = row.score - 1;
+                    if (score < 0) score = 0;
+                } else
+                    return message.reply(
+                        "Erreur lors de la modification du score"
+                    );
+
+                db.run(
+                    "UPDATE absences SET score=? WHERE LOWER(name)=?",
+                    [score, name],
+                    (error) => {
+                        if (error) {
+                            console.log(error);
+                            return message.reply(
+                                "Erreur lors de la requête"
+                            );
+                        }
+                        return message.reply(
+                            (message.content.endsWith("++")
+                                ? "Une nouvelle absence pour "
+                                : "Une absence de moins pour ") +
+                                name +
+                                " ! Nouveau score : " +
+                                score +
+                                " absence(s)"
+                        );
+                    }
+                );
+            } else
+                return message.reply(
+                    "Ce participant n'existe pas, utilise /absences new " +
+                        name
+                );
+        }
+    )
 }
 
 function log(interaction, error) {
