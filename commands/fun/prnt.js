@@ -6,7 +6,8 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 module.exports = {
 	data: new Discord.SlashCommandBuilder()
 		.setName('prnt')
-		.setDescription('Replies with a random screenshot from prnt.sc'),
+		.setDescription('Replies with a random screenshot from prnt.sc')
+        .setDMPermission(true),
 	async execute(interaction) {
         sendRandomPic(interaction, 0);
     },

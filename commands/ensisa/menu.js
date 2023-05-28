@@ -10,7 +10,8 @@ module.exports = {
     getMenuEmbed,
 	data: new Discord.SlashCommandBuilder()
 		.setName('menu')
-		.setDescription('Sends the menu of the day (RU Illberg).'),
+		.setDescription('Sends the menu of the day (RU Illberg).')
+		.setDMPermission(true),
 	async execute(interaction) {
         if (fetchMenu(interaction) == null) {
             interaction.reply("Pas de menu aujourd'hui (boloss).");

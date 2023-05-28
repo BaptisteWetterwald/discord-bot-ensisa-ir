@@ -24,7 +24,8 @@ module.exports = {
         .addAttachmentOption(option => option.setName('attachment6').setDescription('Attachment to store.').setRequired(false))
         .addAttachmentOption(option => option.setName('attachment7').setDescription('Attachment to store.').setRequired(false))
         .addAttachmentOption(option => option.setName('attachment8').setDescription('Attachment to store.').setRequired(false))
-        .addAttachmentOption(option => option.setName('attachment9').setDescription('Attachment to store.').setRequired(false)),
+        .addAttachmentOption(option => option.setName('attachment9').setDescription('Attachment to store.').setRequired(false))
+        .setDMPermission(false),
 	async execute(interaction) {
         if (db == null){
             db = new sqlite3.Database('./database/bot-discord-db.sqlite');

@@ -4,7 +4,8 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 module.exports = {
     data: new Discord.SlashCommandBuilder()
 		.setName('face')
-		.setDescription('Sends a random face picture from thispersondoesnotexist.com.'),
+		.setDescription('Sends a random face picture from thispersondoesnotexist.com.')
+        .setDMPermission(true),
 	async execute(interaction) {
         let url = "https://fakeface.rest/face/json";
         await fetch(url)

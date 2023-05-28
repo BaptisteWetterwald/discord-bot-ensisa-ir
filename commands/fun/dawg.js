@@ -4,7 +4,8 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 module.exports = {
 	data: new Discord.SlashCommandBuilder()
 		.setName('dawg')
-		.setDescription('Sends a random dog picture.'),
+		.setDescription('Sends a random dog picture.')
+		.setDMPermission(true),
 	async execute(interaction) {
         fetch("https://dog.ceo/api/breeds/image/random")
 			.then((res) => res.json())

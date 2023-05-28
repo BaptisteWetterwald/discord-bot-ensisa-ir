@@ -6,7 +6,8 @@ const blagues = new BlaguesAPI(blagues_api_key);
 module.exports = {
 	data: new Discord.SlashCommandBuilder()
 		.setName('blague')
-		.setDescription('Sends a joke (in french).'),
+		.setDescription('Sends a joke (in french).')
+		.setDMPermission(true),
 	async execute(interaction) {
         const data = await blagues.random();
 		let joke = data.joke;

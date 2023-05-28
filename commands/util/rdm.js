@@ -5,7 +5,8 @@ module.exports = {
 		.setName('rdm')
 		.setDescription('Replies with a random int between optional min value and max value (inclusive).')
         .addIntegerOption(option => option.setName('max').setDescription('Maximum value.').setRequired(true))
-        .addIntegerOption(option => option.setName('min').setDescription('Minimum value.')),
+        .addIntegerOption(option => option.setName('min').setDescription('Minimum value.'))
+        .setDMPermission(true),
 	async execute(interaction) {
         const min = interaction.options.getInteger('min') ?? 0;
         const max = interaction.options.getInteger('max');

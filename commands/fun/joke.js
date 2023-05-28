@@ -4,7 +4,8 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 module.exports = {
 	data: new Discord.SlashCommandBuilder()
 		.setName('joke')
-		.setDescription('Sends a joke (in english).'),
+		.setDescription('Sends a joke (in english).')
+        .setDMPermission(true),
 	async execute(interaction) {
         fetch('https://official-joke-api.appspot.com/random_joke')
         .then(function(response) {

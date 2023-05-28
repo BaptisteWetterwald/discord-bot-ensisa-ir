@@ -4,7 +4,8 @@ const { getColor } = require('../../utils/randomColor.js');
 module.exports = {
     data: new Discord.SlashCommandBuilder()
 		.setName('help')
-		.setDescription('Sends a list of commands with their description.'),
+		.setDescription('Sends a list of commands with their description.')
+        .setDMPermission(true),
 	async execute(interaction) {
         let decs = {};
         interaction.client.commands.forEach(command => {
