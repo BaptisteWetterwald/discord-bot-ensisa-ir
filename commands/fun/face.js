@@ -8,6 +8,7 @@ module.exports = {
         .setDMPermission(true),
 	async execute(interaction) {
         let url = "https://fakeface.rest/face/json";
+        interaction.deferReply();
         await fetch(url)
             .then(function(response) {
                 if (response.ok) return response.json();
@@ -15,12 +16,12 @@ module.exports = {
             .then(function(data) {
                 // if no problem
                 if (data.status = "success") {
-                    interaction.reply({ files: [data.image_url] });
+                    interaction.editReply({ files: [data.image_url] });
                 }
             })
             .catch(err => {
                 console.log(err);
-                interaction.reply("Erreur lors de la requête.");
+                interaction.editReply("Erreur lors de la requête.");
             });
 	},
 };

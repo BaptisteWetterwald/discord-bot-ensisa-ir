@@ -7,7 +7,7 @@ const { names } = require('../json/commands-bypass-channel.json');
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
-        if (interaction.isChatInputCommand() && interaction.channel.id != mainChannel && !shouldBypass(interaction.commandName))
+        if (interaction.isChatInputCommand() && interaction.channel != null && interaction.channel.id != mainChannel && !shouldBypass(interaction.commandName))
             return await interaction.reply({ content: `Le bot est désactivé dans ce salon, va dans <#${mainChannel}>`, ephemeral: true });
 
         if (interaction.isChatInputCommand()) return executeCommand(interaction);
