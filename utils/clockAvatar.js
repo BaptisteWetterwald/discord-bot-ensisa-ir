@@ -39,8 +39,9 @@ async function setClockAvatar(client){
 
     // draw the clock hands (hours and minutes) based on the current time (in the 'Europe/Paris' timezone)
     let now = new Date();
-    let hour = now.getHours();
-    let minute = now.getMinutes();
+    let frenchTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+    let hour = frenchTime.getHours();
+    let minute = frenchTime.getMinutes();
 
     // draw the hour hand
     ctx.lineWidth = 4;
