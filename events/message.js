@@ -6,12 +6,9 @@ const autoReplies  = require('../json/autoReplies.json');
 const { laughingWords }  = require('../json/laughingWords.json');
 const { leagueOfLegends } = require('../ids/channels-id.json');
 
-let client;
-
 module.exports = {
 	name: Discord.Events.MessageCreate,
 	execute(message) {
-        client = message.client;
         if (message.author.bot) return;
         if (message.content.endsWith("++") || message.content.endsWith("--")) return checkForAbsences(message);
 
@@ -25,7 +22,7 @@ module.exports = {
 
 function emojiIfEndsWith(message) {
     Object.keys(reactionsByEnd).forEach((word) => {
-        if (message.content.toLowerCase().endsWith(word)) return message.react(client.emojis.cache.find(emoji => emoji.name === reactionsByEnd[word]));
+        if (message.content.toLowerCase().endsWith(word)) return message.react(message.guild.emojis.cache.find(emoji => emoji.name === reactionsByEnd[word]));
     });
 }
 
@@ -46,7 +43,7 @@ function emojiIfLeagueOfLegends(message) {
 
 function emojiIfRole(message) {
     Object.keys(reactionsByRole).forEach((roleId) => {
-        if (message.member.roles.cache.has(roleId)) message.react(client.emojis.cache.find(emoji => emoji.name === reactionsByRole[roleId]));
+        if (message.member.roles.cache.has(roleId)) message.react(message.guild.emojis.cache.find(emoji => emoji.name === reactionsByRole[roleId]));
     });
 }
 
