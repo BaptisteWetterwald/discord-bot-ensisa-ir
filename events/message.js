@@ -30,7 +30,7 @@ function emojiIfEndsWith(message) {
 }
 
 function emojiIfLaughing(message) {
-    Object.keys(laughingWords).forEach((word) => {
+    laughingWords.forEach((word) => {
         if (message.content.toLowerCase().includes(word)) return message.react("😹");
     });
 }
