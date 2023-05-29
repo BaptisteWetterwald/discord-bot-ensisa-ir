@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "blagues-api": "^2.1.1",
+    "canvas": "^2.11.2",
     "cheerio": "^1.0.0-rc.12",
     "cron": "^2.3.1",
     "discord.js": "^14.11.0",

@@ -8,6 +8,7 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const { setupDatabases } = require('./utils/setupDatabases');
 const { fetchMenuGeneral } = require('./commands/ensisa/menu');
+const { setClockAvatar } = require('./utils/clockAvatar');
 
 // Create a new client instance
 const client = new Client({ 
@@ -66,9 +67,21 @@ for (const file of eventFiles) {
 
 setupDatabases();
 
+// cron job to fetch the menu every day from monday to friday at 10:00
 new CronJob(
 	'0 0 10 * * 1-5',
 	fetchMenuGeneral,
+	null,
+	true,
+	'Europe/Paris'
+);
+
+// cron job to update the clock avatar every 15 minutes (0, 15, 30, 45)
+new CronJob(
+	'0,15,30,45 * * * *',
+	function() {
+		setClockAvatar(client);
+	},
 	null,
 	true,
 	'Europe/Paris'
