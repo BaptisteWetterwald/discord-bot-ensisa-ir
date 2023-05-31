@@ -13,8 +13,9 @@ module.exports = {
 		.setDescription('Sends the menu of the day (RU Illberg).')
 		.setDMPermission(true),
 	async execute(interaction) {
-        if (fetchMenu(interaction=interaction)) {
-            interaction.reply("Pas de menu aujourd'hui...");
+		await interaction.deferReply();
+        if (fetchMenu(interaction, null)) {
+            interaction.editReply("Pas de menu aujourd'hui...");
         }
 	},
 };
@@ -63,7 +64,7 @@ async function fetchMenu(interaction = null, channel = null){
 
 			let embed = getMenuEmbed(menus, meatOrigin);
 			if (interaction != null) {
-				interaction.reply({ embeds: [embed] });
+				interaction.editReply({ embeds: [embed] });
 			}
 			else if (channel != null) {
 				channel.send({ embeds: [embed] });
@@ -72,7 +73,7 @@ async function fetchMenu(interaction = null, channel = null){
 		.catch(err => {
 			console.log(err);
 			if (interaction != null) {
-				interaction.reply("Une erreur est survenue lors de la récupération du menu.");
+				interaction.editReply("Une erreur est survenue lors de la récupération du menu.");
 			}
 			else if (channel != null) {
 				channel.send("Une erreur est survenue lors de la récupération du menu.");
@@ -112,5 +113,5 @@ function getMenuEmbed(menus, meatOrigin){
 }
 
 function fetchMenuGeneral(){
-	fetchMenu(channel=client.channels.cache.get(menuChannel));
+	fetchMenu(null, client.channels.cache.get(menuChannel));
 }
