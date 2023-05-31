@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const cheerio = require('cheerio');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-const { cantineChannelId } = require('../../config.json');
+const { menuChannel } = require('../../ids/channels-id.json');
 const { getColor } = require('../../utils/randomColor.js');
 
 module.exports = {
@@ -13,13 +13,13 @@ module.exports = {
 		.setDescription('Sends the menu of the day (RU Illberg).')
 		.setDMPermission(true),
 	async execute(interaction) {
-        if (fetchMenu(interaction) == null) {
-            interaction.reply("Pas de menu aujourd'hui (boloss).");
+        if (fetchMenu(interaction=interaction)) {
+            interaction.reply("Pas de menu aujourd'hui...");
         }
 	},
 };
 
-async function fetchMenu(interaction){
+async function fetchMenu(interaction = null, channel = null){
 	fetch('https://www.crous-strasbourg.fr/restaurant/resto-u-de-lillberg/')
 		.then(res => res.text())
 		.then(html => {
@@ -61,17 +61,22 @@ async function fetchMenu(interaction){
 			let meatOrigin = menus['Origines de nos viandes du jour'];
 			delete menus['Origines de nos viandes du jour'];
 
-			/*console.log("Menus du jour :");
-			console.log(menus);
-			console.log("Origine de la viande :");
-			console.log(meatOrigin);*/
-
 			let embed = getMenuEmbed(menus, meatOrigin);
-			interaction.reply({ embeds: [embed] });
+			if (interaction != null) {
+				interaction.reply({ embeds: [embed] });
+			}
+			else if (channel != null) {
+				channel.send({ embeds: [embed] });
+			}
 		})
 		.catch(err => {
 			console.log(err);
-			interaction.reply("Erreur lors de la requête.");
+			if (interaction != null) {
+				interaction.reply("Une erreur est survenue lors de la récupération du menu.");
+			}
+			else if (channel != null) {
+				channel.send("Une erreur est survenue lors de la récupération du menu.");
+			}
 		});
 	return true;
 }
@@ -107,5 +112,5 @@ function getMenuEmbed(menus, meatOrigin){
 }
 
 function fetchMenuGeneral(){
-	fetchMenu(client.channels.cache.get(cantineChannelId));
+	fetchMenu(channel=client.channels.cache.get(menuChannel));
 }
