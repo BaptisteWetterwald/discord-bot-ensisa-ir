@@ -6,7 +6,7 @@ const { getColor } = require('../../utils/randomColor.js');
 
 module.exports = {
 	cooldown: 3,
-    fetchMenu,
+    fetchMenuGeneral,
     getMenuEmbed,
 	data: new Discord.SlashCommandBuilder()
 		.setName('menu')
