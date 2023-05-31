@@ -14,7 +14,7 @@ module.exports = {
 		.setDMPermission(true),
 	async execute(interaction) {
 		await interaction.deferReply();
-        if (fetchMenu(interaction, null)) {
+        if (!fetchMenu(interaction, null)) {
             interaction.editReply("Pas de menu aujourd'hui...");
         }
 	},
