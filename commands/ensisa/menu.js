@@ -112,6 +112,6 @@ function getMenuEmbed(menus, meatOrigin){
 	return embed;
 }
 
-function fetchMenuGeneral(){
+function fetchMenuGeneral(client){
 	fetchMenu(null, client.channels.cache.get(menuChannel));
 }

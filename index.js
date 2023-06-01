@@ -70,7 +70,9 @@ setupDatabases();
 // cron job to fetch the menu every day from monday to friday at 10:00
 new CronJob(
 	'0 0 10 * * 1-5',
-	fetchMenuGeneral,
+	function() {
+		fetchMenuGeneral(client);
+	},
 	null,
 	true,
 	'Europe/Paris'
