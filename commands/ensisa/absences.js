@@ -5,6 +5,7 @@ const { mainChannel } = require('../../ids/channels-id.json');
 
 module.exports = {
     checkForAbsences,
+    setupAbsencesDatabase,
     data: new Discord.SlashCommandBuilder()
 		.setName('absences')
 		.setDescription('Manages the absences database.')
@@ -151,4 +152,10 @@ async function checkForAbsences(message) {
 function log(interaction, error) {
     console.log(error);
     return interaction.reply("Erreur lors de la requête");
+}
+
+function setupAbsencesDatabase(){
+    db.run("CREATE TABLE IF NOT EXISTS absences(name TEXT PRIMARY KEY, score INTEGER DEFAULT 0)", (error)=>{
+        if (error) return console.log(error);
+    });
 }

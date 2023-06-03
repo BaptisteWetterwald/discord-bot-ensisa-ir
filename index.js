@@ -9,6 +9,7 @@ const { CronJob } = require('cron');
 const { setupDatabases } = require('./utils/setupDatabases');
 const { fetchMenuGeneral } = require('./commands/ensisa/menu');
 const { setClockAvatar } = require('./utils/clockAvatar');
+const { wishBirthdays } = require('./commands/ensisa/anniv');
 
 // Create a new client instance
 const client = new Client({ 
@@ -89,5 +90,12 @@ new CronJob(
 	'Europe/Paris'
 );
 
+// every day at 10:00 AM, check if it's someone's birthday and wish them a happy birthday in main channel (in the same message)
+new CronJob('0 10 * * *', function() {
+    wishBirthdays(client);
+}).start();
+
 // Log in to Discord with your client's token
 client.login(token);
+
+module.exports = { client };

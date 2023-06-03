@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
-let db = null;
+const db = new sqlite3.Database('./database/bot-discord-db.sqlite');
 const deleteButtonId = 'deleteQuote';
 
 const deleteButton = new Discord.ButtonBuilder()
@@ -10,6 +10,7 @@ const deleteButton = new Discord.ButtonBuilder()
     .setStyle(Discord.ButtonStyle.Danger);
 
 module.exports = {
+    setupCitationsDatabase,
 	data: new Discord.SlashCommandBuilder()
 		.setName('citation')
 		.setDescription('Store or display a quote based on the given arguments.')
@@ -27,11 +28,6 @@ module.exports = {
         .addAttachmentOption(option => option.setName('attachment9').setDescription('Attachment to store.').setRequired(false))
         .setDMPermission(false),
 	async execute(interaction) {
-        if (db == null){
-            db = new sqlite3.Database('./database/bot-discord-db.sqlite');
-            setupCitationsDatabase();
-        }
-
         let attachments = [];
         for (let i = 0; i < 10; i++){
             let attachment = interaction.options.getAttachment('attachment' + i);
