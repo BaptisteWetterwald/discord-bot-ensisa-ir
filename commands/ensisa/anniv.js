@@ -141,6 +141,7 @@ function displayNextBirthdays(interaction) {
                     // add birthdays to message
                     sortedBirthdays.forEach(birthday => {
                         let age = getAge(birthday.date);
+
                         const user = interaction.guild.members.cache.get(birthday.user_id);
 
                         // format date as "JJ mois"
@@ -148,11 +149,6 @@ function displayNextBirthdays(interaction) {
                         const month = birthday.date.substring(5, 7);
                         const monthName = getMonthName(month);
                         birthday.date = `${date} ${monthName}`;
-
-                        // age after birthday has passed (today included)
-                        if (today.substring(5) >= birthday.date) {
-                            age++;
-                        }
 
                         message += `:small_blue_diamond: ${user} : ${birthday.date} (il/elle aura ${age} ans)\n`;
                     });
@@ -166,15 +162,15 @@ function displayNextBirthdays(interaction) {
     });
 }
 
-function getAge(date) {
+function getAge(dob) {
+    // get the age based on the date of birth and the date with same day and month as dob for current year
     const today = new Date();
-    const birthDate = new Date(date);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const month = today.getMonth() - birthDate.getMonth();
-    if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
+    const dobDate = new Date(dob);
+    const dobDateWithYear = new Date(today.getFullYear(), dobDate.getMonth(), dobDate.getDate());
+    let age = dobDateWithYear.getFullYear() - dobDate.getFullYear();
+    
     return age;
+    
 }
 
 function getMonthName(month) {
@@ -240,6 +236,7 @@ function displayAllBirthdays(interaction) {
                 // add birthdays to message
                 sortedBirthdays.forEach(birthday => {
                     let age = getAge(birthday.date);
+
                     const user = interaction.guild.members.cache.get(birthday.user_id);
 
                     // format date as "JJ mois"
@@ -248,15 +245,7 @@ function displayAllBirthdays(interaction) {
                     const monthName = getMonthName(month);
                     birthday.date = `${date} ${monthName}`;
 
-
-                    const today = new Date().toISOString().slice(0, 10);
-
-                    // age after birthday has passed (today included)
-                    if (today.substring(5) >= birthday.date) {
-                        age++;
-                    }
-
-                    message += `:small_blue_diamond: ${user} : ${birthday.date} (il/elle aura ${age} ans)\n`;
+                    message += `:small_blue_diamond: ${user} : ${birthday.date}\n`;
                 });
                 // remove last \n
                 message = message.substring(0, message.length - 1);
