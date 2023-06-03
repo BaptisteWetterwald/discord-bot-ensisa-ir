@@ -56,6 +56,14 @@ async function fetchMenu(interaction = null, channel = null){
 			}
 
 			if (Object.keys(menus).length == 0 || (Object.keys(menus).length == 1 && Object.keys(menus).includes('Origines de nos viandes du jour'))) {
+				
+				if (interaction != null) {
+					interaction.editReply("Pas de menu aujourd'hui...");
+				}
+				else if (channel != null) {
+					channel.send("Pas de menu aujourd'hui...");
+				}
+				
 				return null; // no menu found for today
 			}
 
