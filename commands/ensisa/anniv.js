@@ -140,7 +140,7 @@ function displayNextBirthdays(interaction) {
 
                     // add birthdays to message
                     sortedBirthdays.forEach(birthday => {
-                        const age = getAge(birthday.date);
+                        let age = getAge(birthday.date);
                         const user = interaction.guild.members.cache.get(birthday.user_id);
 
                         // format date as "JJ mois"
@@ -149,7 +149,12 @@ function displayNextBirthdays(interaction) {
                         const monthName = getMonthName(month);
                         birthday.date = `${date} ${monthName}`;
 
-                        message += `:small_blue_diamond: ${user} (${age} ans) : ${birthday.date}\n`;
+                        // age after birthday has passed (today included)
+                        if (today.substring(5) >= birthday.date) {
+                            age++;
+                        }
+
+                        message += `:small_blue_diamond: ${user} : ${birthday.date} (il/elle aura ${age} ans)\n`;
                     });
 
                     // remove last \n
@@ -234,7 +239,7 @@ function displayAllBirthdays(interaction) {
                 });
                 // add birthdays to message
                 sortedBirthdays.forEach(birthday => {
-                    const age = getAge(birthday.date);
+                    let age = getAge(birthday.date);
                     const user = interaction.guild.members.cache.get(birthday.user_id);
 
                     // format date as "JJ mois"
@@ -243,7 +248,15 @@ function displayAllBirthdays(interaction) {
                     const monthName = getMonthName(month);
                     birthday.date = `${date} ${monthName}`;
 
-                    message += `:small_blue_diamond: ${user} (${age} ans) : ${birthday.date}\n`;
+
+                    const today = new Date().toISOString().slice(0, 10);
+
+                    // age after birthday has passed (today included)
+                    if (today.substring(5) >= birthday.date) {
+                        age++;
+                    }
+
+                    message += `:small_blue_diamond: ${user} : ${birthday.date} (il/elle aura ${age} ans)\n`;
                 });
                 // remove last \n
                 message = message.substring(0, message.length - 1);

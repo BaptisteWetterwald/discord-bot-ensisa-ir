@@ -90,10 +90,15 @@ new CronJob(
 	'Europe/Paris'
 );
 
-// every day at 10:00 AM, check if it's someone's birthday and wish them a happy birthday in main channel (in the same message)
-new CronJob('0 10 * * *', function() {
-    wishBirthdays(client);
-}).start();
+new CronJob(
+	'0 8 * * *',
+	function() {
+    	wishBirthdays(client);
+	},
+	null,
+	true,
+	'Europe/Paris'
+);
 
 // Log in to Discord with your client's token
 client.login(token);
