@@ -49,7 +49,7 @@ function emojiIfRole(message) {
 
 function autoReply(message) {
     Object.keys(autoReplies).forEach((word) => {
-        if (message.content.toLowerCase().includes(word))
+        if (message.content.toLowerCase().split(' ').includes(word))
             message.reply(autoReplies[word].replace('{sender}', message.author.username));
     });
 }
