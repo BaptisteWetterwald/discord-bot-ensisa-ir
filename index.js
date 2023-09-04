@@ -25,10 +25,6 @@ const client = new Client({
 		GatewayIntentBits.DirectMessageTyping,
 		GatewayIntentBits.GuildEmojisAndStickers,
 	] ,
-	presence: {
-		activities: [{ name: 'with the API', type: 'PLAYING' }],
-		status: 'idle',
-	},
 	partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
 });
 
@@ -84,6 +80,18 @@ new CronJob(
 	'0,15,30,45 * * * *',
 	function() {
 		setClockAvatar(client);
+	},
+	null,
+	true,
+	'Europe/Paris'
+);
+
+// update status every 30 minutes
+new CronJob(
+	'0,30 * * * *',
+	function() {
+		// set status to "Ketchup + mayo = goulag"
+		client.user.setActivity('Ketchup + mayo = goulag', { type: 'PLAYING' });
 	},
 	null,
 	true,
