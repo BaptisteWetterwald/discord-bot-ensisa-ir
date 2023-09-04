@@ -90,8 +90,10 @@ new CronJob(
 new CronJob(
 	'0,30 * * * *',
 	function() {
-		// set status to "Ketchup + mayo = goulag"
-		client.user.setActivity('Ketchup + mayo = goulag', { type: 'PLAYING' });
+		client.user.setPresence({
+			activities: [{ name: "Ketchup + mayo = goulag" }],
+			status: "online",
+		});
 	},
 	null,
 	true,

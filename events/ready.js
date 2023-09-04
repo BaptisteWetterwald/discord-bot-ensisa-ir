@@ -10,5 +10,6 @@ module.exports = {
 			activities: [{ name: "Ketchup + mayo = goulag" }],
 			status: "online",
 		});
+
 	},
 };
