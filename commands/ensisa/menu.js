@@ -55,7 +55,15 @@ async function fetchMenu(interaction = null, channel = null){
 				}
 			}
 
-			if (Object.keys(menus).length == 0 || (Object.keys(menus).length == 1 && Object.keys(menus).includes('Origines de nos viandes du jour'))) {
+			if (
+				Object.keys(menus).length == 0 
+				|| (Object.keys(menus).length == 1 && 
+						(
+							Object.keys(menus).includes('Origines de nos viandes du jour')
+						|| Object.keys(menus)[0].includes('Fermeture')
+						)
+					)
+			) {
 				
 				if (interaction != null) {
 					interaction.editReply("Pas de menu aujourd'hui...");
