@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const DomParser = require('dom-parser');
-const { getColor } = require('../../utils/randomColor.js');
+const { getColor } = require('../utils/randomColor.js');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 module.exports = {

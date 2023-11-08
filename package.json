@@ -17,6 +17,8 @@
     "discord.js": "^14.11.0",
     "dom-parser": "^0.1.6",
     "node-fetch": "^3.3.1",
-    "sqlite3": "^5.1.6"
+    "puppeteer": "^21.5.0",
+    "sqlite3": "^5.1.6",
+    "sv443-joke-api": "^0.1.0"
   }
 }

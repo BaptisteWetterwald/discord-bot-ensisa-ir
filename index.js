@@ -8,6 +8,7 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const { setupDatabases } = require('./utils/setupDatabases');
 const { fetchMenuGeneral } = require('./commands/ensisa/menu');
+const { fetchEDTGeneral } = require('./commands/ensisa/edt')
 const { setClockAvatar } = require('./utils/clockAvatar');
 const { wishBirthdays } = require('./commands/ensisa/anniv');
 
@@ -69,6 +70,17 @@ new CronJob(
 	'0 0 10 * * 1-5',
 	function() {
 		fetchMenuGeneral(client);
+	},
+	null,
+	true,
+	'Europe/Paris'
+);
+
+// cron job to fetch EDT every monday at 7:30
+new CronJob(
+	'0 30 7 * * 1',
+	function() {
+		fetchEDTGeneral(client);
 	},
 	null,
 	true,

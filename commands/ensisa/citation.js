@@ -42,9 +42,14 @@ module.exports = {
 
             let totalSize = 0;
             for (let attachment of attachments){
-                if (!attachment.url.endsWith('.png') && !attachment.url.endsWith('.jpg') && !attachment.url.endsWith('.jpeg')){
-                    return interaction.editReply('Les fichiers joints doivent être des images.');
-                }
+
+                // get the part of the url before the last '?' character
+                let attachmentUrl = attachment.url.split('?')[0];
+                if (!(
+                        attachmentUrl.endsWith('.png')
+                        || attachmentUrl.endsWith('.jpg')
+                        || attachmentUrl.endsWith('.jpeg')
+                    )) return interaction.editReply('Les fichiers joints doivent être des images.');
                 totalSize += attachment.size;
             }
             if (totalSize > 8000000) return interaction.editReply('La taille totale des fichiers joints ne doit pas dépasser 8MB.');
