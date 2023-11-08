@@ -1,24 +1,17 @@
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const JokeAPI = require('sv443-joke-api');
 
 module.exports = {
 	data: new Discord.SlashCommandBuilder()
 		.setName('joke')
-		.setDescription('Sends a joke (in english).')
+		.setDescription('Sends a joke.')
         .setDMPermission(true),
 	async execute(interaction) {
-        fetch('https://official-joke-api.appspot.com/random_joke')
-        .then(function(response) {
-            if (response.ok) return response.json();
-        })
-        .then(function(data) {
-            let joke = data.setup;
-            joke += "\n" + data.punchline;
-            interaction.reply(joke);
-        })
-        .catch(err => {
-            console.log(err);
-            interaction.reply("Erreur lors de la requête.");
+        JokeAPI.getJokes({categories: ['dark']})
+        .then((res) => res.json())
+        .then((data) => {
+            interaction.reply(data.setup + "\n" + data.delivery);
         });
-	},
+    },
 };
