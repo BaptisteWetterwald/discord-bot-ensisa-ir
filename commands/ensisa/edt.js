@@ -23,7 +23,7 @@ module.exports = {
 	},
 };
 
-async function fetchEDT({interaction = null, channel = null, search_key = null, fullWeek = false, update = false}){
+async function fetchEDT({interaction, channel, search_key, fullWeek = false, update = false}){
     if (interaction) {
         if (interaction.options.getBoolean('semaine')) fullWeek = interaction.options.getBoolean('semaine');
         if (interaction.options.getBoolean('update')) update = interaction.options.getBoolean('update');
@@ -81,10 +81,13 @@ async function fetchEDT({interaction = null, channel = null, search_key = null, 
     await page.waitForNetworkIdle();
 
     let labelNotFoundText = await page.evaluate(element => element.textContent, labelNotFound);
-    if (labelNotFoundText == "0 élément trouvé"){
+
+    if (Number.parseInt(labelNotFoundText.split(' ')[0]) == 0){
         await browser.close();
         if (interaction) return interaction.editReply("Pas d'emploi du temps trouvé");
         if (channel) return channel.send("Pas d'emploi du temps trouvé");
+
+        console.log("Interaction:" + interaction)
     }
 
     await page.waitForSelector('#x-auto-129 > div.grilleDispo');
