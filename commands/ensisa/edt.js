@@ -58,11 +58,10 @@ async function fetchEDT({interaction = null, channel = null, search_key = null, 
 
             if (interaction) return interaction.editReply({embeds: [embed], files: [path]});
             if (channel) return channel.send({embeds: [embed], files: [path]});
-            throw new Error("No interaction or channel provided to fetchEDT");
         }
     }
 
-	const browser = await puppeteer.launch({headless: false, args:['--no-sandbox']});
+	const browser = await puppeteer.launch({headless: "new", args:['--no-sandbox']});
     const page = await browser.newPage();
     await page.goto('https://www.emploisdutemps.uha.fr');
 
