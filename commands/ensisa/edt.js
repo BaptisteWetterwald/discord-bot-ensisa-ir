@@ -19,15 +19,11 @@ module.exports = {
 		.setDMPermission(true),
 	async execute(interaction) {
 		await interaction.deferReply();
-        if (!fetchEDT(interaction, null)) {
-            interaction.editReply("Pas d'emploi du temps trouvé");
-        }
+        fetchEDT(interaction, null);
 	},
 };
 
-async function fetchEDT(interaction = null, channel = null, fullWeek = false, update = false){
-
-    let search_key;
+async function fetchEDT(interaction = null, channel = null, search_key = null, fullWeek = false, update = false){
 
     if (interaction) {
         if (interaction.options.getBoolean('semaine')) fullWeek = interaction.options.getBoolean('semaine');
@@ -35,8 +31,9 @@ async function fetchEDT(interaction = null, channel = null, fullWeek = false, up
         if (interaction.options.getString('critere')) search_key = interaction.options.getString('critere');
         await interaction.member.fetch();
         interaction.member.roles.cache.forEach(role => {
-            if (keysByRole[role.id] && !search_key) {
+            if (!search_key && keysByRole[role.id]) {
                 search_key = keysByRole[role.id];
+                return;
             }
         });
     }
@@ -66,7 +63,7 @@ async function fetchEDT(interaction = null, channel = null, fullWeek = false, up
         }
     }
 
-	const browser = await puppeteer.launch({headless: "new", args:['--no-sandbox']});
+	const browser = await puppeteer.launch({headless: false, args:['--no-sandbox']});
     const page = await browser.newPage();
     await page.goto('https://www.emploisdutemps.uha.fr');
 
@@ -80,6 +77,17 @@ async function fetchEDT(interaction = null, channel = null, fullWeek = false, up
     
     await search_input.type(search_key);
     await search_input.press('Enter'); // get classes for the group
+
+    // if #x-auto-128 is found, it means that the group doesn't exist
+    let labelNotFound = await page.$('#x-auto-128');
+    await page.waitForNetworkIdle();
+
+    let labelNotFoundText = await page.evaluate(element => element.textContent, labelNotFound);
+    if (labelNotFoundText == "0 élément trouvé"){
+        await browser.close();
+        if (interaction) return interaction.editReply("Pas d'emploi du temps trouvé");
+        if (channel) return channel.send("Pas d'emploi du temps trouvé");
+    }
 
     await page.waitForSelector('#x-auto-129 > div.grilleDispo');
 
@@ -116,11 +124,11 @@ async function fetchEDT(interaction = null, channel = null, fullWeek = false, up
     else if (channel) channel.send({embeds: [embed], files: [path]});
     else throw new Error("No interaction or channel provided to fetchEDT");
 
-    // delete from cache if name doesn't match "edt_<2ir[0-7]>_<semaine|jour>.png"
     const regex = /edt_2ir[0-7]_(semaine|jour)\.png/;
     if (!regex.test(name)) {
-        // delete file from cache
-        deleteEDTCache();
+        fs.rm(path, (err) => {
+            if (err) throw err;
+        });
     };
 }
 
@@ -130,15 +138,15 @@ function fetchEDTGeneral(client){
 }
 
 function deleteEDTCache(){
-    const directory = '../../images/edt';
-    const path = require('path');
-    // delete all files in cache
-    fs.readdir(directory, (err, files) => {
+    const folder = './images/edt';
+    
+    fs.readdir(folder, (err, files) => {
         if (err) throw err;
       
         for (const file of files) {
-          fs.rm(path.join(directory, file));
+            fs.rm(folder + '/' + file, err => {
+                if (err) throw err;
+            });
         }
     });
-
 }

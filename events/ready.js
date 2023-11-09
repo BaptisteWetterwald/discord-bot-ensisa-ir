@@ -1,4 +1,5 @@
 const { Events } = require('discord.js');
+const { deleteEDTCache } = require('../commands/ensisa/edt');
 
 module.exports = {
 	name: Events.ClientReady,
@@ -17,6 +18,5 @@ module.exports = {
 			activities: [{ name: "Ketchup + mayo = goulag" }],
 			status: "online",
 		});
-
 	},
 };
