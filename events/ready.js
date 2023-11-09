@@ -1,5 +1,5 @@
 const { Events } = require('discord.js');
-const { deleteEDTCache } = require('../commands/ensisa/edt');
+const { deleteEDTCache, updateAllEDT} = require('../commands/ensisa/edt');
 
 module.exports = {
 	name: Events.ClientReady,
@@ -18,5 +18,9 @@ module.exports = {
 			activities: [{ name: "Ketchup + mayo = goulag" }],
 			status: "online",
 		});
+		
+		// make deleteCache async then call it here
+
+		//updateAllEDT(client);
 	},
 };

@@ -4,12 +4,12 @@ const fs = require('fs');
 
 const { getColor } = require('../../utils/randomColor.js');
 const {email, password} = require('../../json/login_uha.json');
-const {EDTChannel} = require('../../ids/channels-id.json');
 const keysByRole = require('../../json/edt_keysByRole.json')
 
 module.exports = {
-    fetchEDTGeneral,
+    updateAllEDT,
     deleteEDTCache,
+    fetchEDT,
 	data: new Discord.SlashCommandBuilder()
         .addStringOption(option => option.setName('critere').setDescription('Group to search for (ex: 2ir7)').setRequired(false))
         .addBooleanOption(option => option.setName('semaine').setDescription('Search for full week if true, else search for current day').setRequired(false))
@@ -19,12 +19,11 @@ module.exports = {
 		.setDMPermission(true),
 	async execute(interaction) {
 		await interaction.deferReply();
-        fetchEDT(interaction, null);
+        fetchEDT({interaction: interaction});
 	},
 };
 
-async function fetchEDT(interaction = null, channel = null, search_key = null, fullWeek = false, update = false){
-
+async function fetchEDT({interaction = null, channel = null, search_key = null, fullWeek = false, update = false}){
     if (interaction) {
         if (interaction.options.getBoolean('semaine')) fullWeek = interaction.options.getBoolean('semaine');
         if (interaction.options.getBoolean('update')) update = interaction.options.getBoolean('update');
@@ -112,7 +111,9 @@ async function fetchEDT(interaction = null, channel = null, search_key = null, f
     await element.screenshot({path: path});
     await browser.close();
 
-    const embed = new Discord.EmbedBuilder()
+    if (interaction || channel)
+    {
+        const embed = new Discord.EmbedBuilder()
         .setColor(getColor())
         .setTitle("Emploi du temps " + (fullWeek ? "de la semaine" : "du jour"))
         .setTimestamp()
@@ -120,9 +121,9 @@ async function fetchEDT(interaction = null, channel = null, search_key = null, f
         .setURL('https://www.emploisdutemps.uha.fr')
         .setFooter({text: "Critère de recherche : " + search_key});
 
-    if (interaction) interaction.editReply({embeds: [embed], files: [path]});
-    else if (channel) channel.send({embeds: [embed], files: [path]});
-    else throw new Error("No interaction or channel provided to fetchEDT");
+        if (interaction) interaction.editReply({embeds: [embed], files: [path]});
+        else if (channel) channel.send({embeds: [embed], files: [path]});
+    }
 
     const regex = /edt_2ir[0-7]_(semaine|jour)\.png/;
     if (!regex.test(name)) {
@@ -132,9 +133,11 @@ async function fetchEDT(interaction = null, channel = null, search_key = null, f
     };
 }
 
-function fetchEDTGeneral(client){
-    deleteEDTCache();
-    fetchEDT(null, client.channels.cache.get(EDTChannel), fullWeek = true, update = true);
+function updateAllEDT(client){ // fetches all EDTs for all roles
+    for (const [key, value] of Object.entries(keysByRole)) {
+        fetchEDT({search_key: value, fullWeek: false, update: true});
+        fetchEDT({search_key: value, fullWeek: true, update: true});
+    }
 }
 
 function deleteEDTCache(){
@@ -142,11 +145,12 @@ function deleteEDTCache(){
     
     fs.readdir(folder, (err, files) => {
         if (err) throw err;
-      
+    
         for (const file of files) {
             fs.rm(folder + '/' + file, err => {
                 if (err) throw err;
             });
         }
-    });
+    })
+    
 }

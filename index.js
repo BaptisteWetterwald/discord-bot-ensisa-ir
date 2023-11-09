@@ -8,9 +8,10 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const { setupDatabases } = require('./utils/setupDatabases');
 const { fetchMenuGeneral } = require('./commands/ensisa/menu');
-const { fetchEDTGeneral } = require('./commands/ensisa/edt')
+const { updateAllEDT, fetchEDT } = require('./commands/ensisa/edt')
 const { setClockAvatar } = require('./utils/clockAvatar');
 const { wishBirthdays } = require('./commands/ensisa/anniv');
+const { EDTChannel } = require('./ids/channels-id.json');
 
 // Create a new client instance
 const client = new Client({ 
@@ -76,11 +77,33 @@ new CronJob(
 	'Europe/Paris'
 );
 
-// cron job to fetch EDT every monday at 7:30
+// cron job to update all EDT every day from monday to friday at 7:20
 new CronJob(
-	'0 30 7 * * 1',
+	'20 7 * * 1-5',
 	function() {
-		fetchEDTGeneral(client);
+		updateAllEDT(client);
+	},
+	null,
+	true,
+	'Europe/Paris'
+);
+
+// cron job to send the EDT of the day every day from monday to friday at 7:30
+new CronJob(
+	'30 7 * * 1-5',
+	function() {
+		fetchEDT({channel: EDTChannel})
+	},
+	null,
+	true,
+	'Europe/Paris'
+);
+
+// cron job to send the EDT of the week every monday at 7:30
+new CronJob(
+	'30 7 * * 1',
+	function() {
+		fetchEDT({channel: EDTChannel, fullWeek: true})
 	},
 	null,
 	true,
