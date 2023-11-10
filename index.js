@@ -92,7 +92,7 @@ new CronJob(
 new CronJob(
 	'30 7 * * 1-5',
 	function() {
-		fetchEDT({channel: EDTChannel})
+		fetchEDT({channel: client.channels.cache.get(EDTChannel)})
 	},
 	null,
 	true,
@@ -103,7 +103,7 @@ new CronJob(
 new CronJob(
 	'30 7 * * 1',
 	function() {
-		fetchEDT({channel: EDTChannel, fullWeek: true})
+		fetchEDT({channel: client.channels.cache.get(EDTChannel), fullWeek: true})
 	},
 	null,
 	true,
