@@ -12,6 +12,14 @@ const { updateAllEDT, fetchEDT } = require('./commands/ensisa/edt')
 const { setClockAvatar } = require('./utils/clockAvatar');
 const { wishBirthdays } = require('./commands/ensisa/anniv');
 const { EDTChannel } = require('./ids/channels-id.json');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./database/bot-discord-db.sqlite');
+const puppeteer = require('puppeteer');
+const {email, password} = require('./json/login_uha.json');
+const { marksChannel } = require('./ids/channels-id.json');
+const { getColor } = require('./utils/randomColor');
+const Discord = require('discord.js');
+
 
 // Create a new client instance
 const client = new Client({ 
@@ -144,6 +152,74 @@ new CronJob(
 	true,
 	'Europe/Paris'
 );
+
+// cronjob to check for new marks every 10 seconds
+new CronJob(
+	'*/10 * * * * *',
+	function() { //check for new marks
+		fetchMarks();
+	},
+	null,
+	true,
+	'Europe/Paris'
+);
+
+async function fetchMarks(){
+	db.run('CREATE TABLE IF NOT EXISTS marks (url TEXT PRIMARY KEY, name TEXT NOT NULL)', 
+		(err) => {
+			if (err) console.log(`[ERROR] ${err.message}`);
+		}
+	);
+
+	const browser = await puppeteer.launch({headless: false, args:['--no-sandbox']});
+    const page = await browser.newPage();
+    await page.goto('https://e-formation.uha.fr/login/index.php?authCAS=CAS');
+	await page.waitForSelector('#username');
+    await page.type('#username', email);
+    await page.type('#password', password);
+    await page.click('button.mdc-button--raised:nth-child(1)'); // login
+	await page.waitForNetworkIdle();
+
+	await page.goto('https://e-formation.uha.fr/course/view.php?id=8903&section=3'); // moodle page with the marks files
+
+	await page.waitForSelector("#ygtvc1");
+	const container = await page.$("#ygtvc1");
+	const files = await container.$$("div.ygtvitem");
+
+	for (const file of files) {
+		const link = await file.$("a");
+
+		let url = await (await link.getProperty('href')).jsonValue();
+		url = String(url).replace('?forcedownload=1', '');
+		const name = await (await link.getProperty('text')).jsonValue();
+		
+		// check if the file is already in the database and add it if not
+		db.get('SELECT * FROM marks WHERE url = ?', [url], (err, row) => async function() {
+			if (err) return console.log(`[ERROR] ${err.message}`);
+			if (!row) {
+
+				db.run('INSERT INTO marks(url, name) VALUES(?, ?)', [url, name], (err) =>  {
+					if (err) return console.log(`[ERROR] ${err.message}`);
+				});
+
+				// create embed with the link to the file and the name of the file
+				let embed = new Discord.EmbedBuilder()
+					.setColor(getColor())
+					.setTitle('Nouvelle note disponible !')
+					.setDescription(`[${name}](${url})`)
+					.setTimestamp()
+					.setFooter(Discord.EmbedFooterAction = {
+						text: 'Puisse le sort vous être favorable...'
+					})
+					.setURL(url);
+
+				client.channels.cache.get(marksChannel).send({ embeds: [embed] });
+			}
+		}.call());
+	}
+	await browser.close();
+
+}
 
 // Log in to Discord with your client's token
 client.login(token);
