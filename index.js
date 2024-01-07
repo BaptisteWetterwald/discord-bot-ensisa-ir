@@ -153,9 +153,9 @@ new CronJob(
 	'Europe/Paris'
 );
 
-// cronjob to check for new marks every 10 seconds
+// cronjob to check for new marks every 4 hours
 new CronJob(
-	'*/10 * * * * *',
+	'0 */4 * * *',
 	function() { //check for new marks
 		fetchMarks();
 	},
@@ -171,7 +171,7 @@ async function fetchMarks(){
 		}
 	);
 
-	const browser = await puppeteer.launch({headless: false, args:['--no-sandbox']});
+	const browser = await puppeteer.launch({headless: 'new', args:['--no-sandbox']});
     const page = await browser.newPage();
     await page.goto('https://e-formation.uha.fr/login/index.php?authCAS=CAS');
 	await page.waitForSelector('#username');
