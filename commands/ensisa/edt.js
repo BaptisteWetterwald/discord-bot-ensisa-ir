@@ -97,7 +97,7 @@ async function fetchEDT({interaction, channel, search_key, fullWeek = false, upd
     else monday = date;
 
     // launch browser and fetch the schedule
-	const browser = await puppeteer.launch({headless: false/*"new"*/, args:['--no-sandbox']});
+	const browser = await puppeteer.launch({headless: /*false*/"new", args:['--no-sandbox']});
 
     const page = await browser.newPage();
     await page.goto('https://www.emploisdutemps.uha.fr');
@@ -166,6 +166,7 @@ async function fetchEDT({interaction, channel, search_key, fullWeek = false, upd
     let x_auto_id = 57 + date.getDay();
 
     await page.waitForSelector('#x-auto-129');
+    await page.waitForNetworkIdle();
 
     if (!fullWeek) {
         // click on the day
