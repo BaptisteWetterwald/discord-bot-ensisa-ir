@@ -11,6 +11,8 @@ module.exports = {
 			guild.channels.fetch();
 			guild.members.fetch();
 		});
+		
+		process.env.TZ = 'Europe/Paris';
 
 		console.log(`Ready! Logged in as ${client.user.tag}`);
 		
