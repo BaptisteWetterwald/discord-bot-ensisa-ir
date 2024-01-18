@@ -83,18 +83,19 @@ async function fetchEDT({interaction, channel, search_key, fullWeek = false, upd
         }
     }
 
-    if (date.getDay() > 5 && !fullWeek) {
+    if ((date.getDay() > 5 || date.getDay() == 0) && !fullWeek) {
         if (interaction) return interaction.editReply("C'est le week-end chacal");
         if (channel) return channel.send("EDT recherché pendant le week-end... Check edt.js");
     }
 
     // get the date of the first monday for the week of the date
-    let monday;
-    if (date.getDay() != 1) {
-        monday = new Date(date);
+    let monday = new Date(date);
+    if (date.getDay() > 1) {
         monday.setDate(date.getDate() - date.getDay() + 1);
     }
-    else monday = date;
+    else if (date.getDay() == 0) {
+        monday.setDate(date.getDate() - 6);
+    }
 
     // launch browser and fetch the schedule
 	const browser = await puppeteer.launch({headless: /*false*/"new", args:['--no-sandbox']});
