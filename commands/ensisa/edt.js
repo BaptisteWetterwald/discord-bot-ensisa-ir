@@ -98,7 +98,13 @@ async function fetchEDT({interaction, channel, search_key, fullWeek = false, upd
     }
 
     // launch browser and fetch the schedule
-	const browser = await puppeteer.launch({headless: /*false*/"new", args:['--no-sandbox']});
+	const browser = await puppeteer.launch({
+        headless: "new",
+        args:[
+            '--no-sandbox'
+        ],
+        defaultViewport: fullWeek ? {width: 1600, height: 1080} : {width: 900, height: 900}
+    });
 
     const page = await browser.newPage();
     await page.goto('https://www.emploisdutemps.uha.fr');
