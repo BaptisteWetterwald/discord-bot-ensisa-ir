@@ -155,7 +155,7 @@ new CronJob(
 
 // cronjob to check for new marks every 4 hours
 new CronJob(
-	'0 */4 * * *',
+	'0 */1 * * *',
 	function() { //check for new marks
 		fetchMarks();
 	},
