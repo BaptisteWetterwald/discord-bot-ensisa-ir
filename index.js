@@ -107,11 +107,11 @@ new CronJob(
 	'Europe/Paris'
 );
 
-// cron job to send the EDT of the week every monday at 7:30
+// cron job to send the EDT of the next week every sunday at 8pm
 new CronJob(
-	'30 7 * * 1',
+	'0 20 * * 0',
 	function() {
-		fetchEDT({channel: client.channels.cache.get(EDTChannel), fullWeek: true})
+		fetchEDT({channel: client.channels.cache.get(EDTChannel), fullWeek: true, increment: 1})
 	},
 	null,
 	true,
