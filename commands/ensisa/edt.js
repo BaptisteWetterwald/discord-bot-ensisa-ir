@@ -268,7 +268,7 @@ async function fetchAllCourses({interaction, channel, search_key, fullWeek, upda
 
     // launch browser and fetch the schedule
 	const browser = await puppeteer.launch({
-        headless: false,
+        headless: "new",
         args:[
             '--no-sandbox'
         ],
