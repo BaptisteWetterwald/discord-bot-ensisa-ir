@@ -118,12 +118,14 @@ function getMenuEmbed(menus, meatOrigin){
 		fields.push({name: menu, value: menuString, inline: false});
 	});
 
-	let meatOriginString = "";
-	meatOrigin.forEach((item) => {
-		meatOriginString += item + "\n";
-	});
-	fields.push({name: "Origine de la viande", value: meatOriginString, inline: false});
-	
+	if (meatOrigin != undefined) {
+		let meatOriginString = "";
+		meatOrigin.forEach((item) => {
+			meatOriginString += item + "\n";
+		});
+		fields.push({name: "Origine de la viande", value: meatOriginString, inline: false});
+	}
+
 	embed.addFields(fields);
 	return embed;
 }
