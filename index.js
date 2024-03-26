@@ -182,8 +182,8 @@ async function fetchMarks(){
 
 	await page.goto('https://e-formation.uha.fr/course/view.php?id=8903&section=3'); // moodle page with the marks files
 
-	await page.waitForSelector("#ygtvc1");
-	const container = await page.$("#ygtvc1");
+	await page.waitForSelector("#ygtvc0");
+	const container = await page.$("#ygtvc0");
 	const files = await container.$$("div.ygtvitem");
 
 	for (const file of files) {
