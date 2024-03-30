@@ -8,7 +8,7 @@ const { token } = require('./config.json');
 const { CronJob } = require('cron');
 const { setupDatabases } = require('./utils/setupDatabases');
 const { fetchMenuGeneral } = require('./commands/ensisa/menu');
-const { updateAllEDT, fetchEDT } = require('./commands/ensisa/edt')
+const { fetchEDT } = require('./commands/ensisa/edt')
 const { setClockAvatar } = require('./utils/clockAvatar');
 const { wishBirthdays } = require('./commands/ensisa/anniv');
 const { EDTChannel } = require('./ids/channels-id.json');
@@ -153,10 +153,10 @@ new CronJob(
 	'Europe/Paris'
 );
 
-// cronjob to check for new marks every 4 hours
+// cronjob to check for new marks every hour
 new CronJob(
 	'0 */1 * * *',
-	function() { //check for new marks
+	function() {
 		fetchMarks();
 	},
 	null,
@@ -180,10 +180,10 @@ async function fetchMarks(){
     await page.click('button.mdc-button--raised:nth-child(1)'); // login
 	await page.waitForNetworkIdle();
 
-	await page.goto('https://e-formation.uha.fr/course/view.php?id=8903&section=3'); // moodle page with the marks files
+	await page.goto('https://e-formation.uha.fr/course/view.php?id=8903&section=4'); // moodle page with the marks files
 
-	await page.waitForSelector("#ygtvc0");
-	const container = await page.$("#ygtvc0");
+	await page.waitForSelector("#ygtv1");
+	const container = await page.$("#ygtv1");
 	const files = await container.$$("div.ygtvitem");
 
 	for (const file of files) {

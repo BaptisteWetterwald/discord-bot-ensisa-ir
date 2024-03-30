@@ -1,7 +1,9 @@
 const Discord = require('discord.js');
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./database/bot-discord-db.sqlite');
 const deleteButtonId = 'deleteQuote';
+const fs = require('fs');
+const pathMod = require('node:path');
+const quotationsFolder = pathMod.resolve('./images/citations/').replace(/\\/g, '/') + '/';
+const https = require('https');
 
 const deleteButton = new Discord.ButtonBuilder()
     .setCustomId(deleteButtonId)
@@ -10,7 +12,6 @@ const deleteButton = new Discord.ButtonBuilder()
     .setStyle(Discord.ButtonStyle.Danger);
 
 module.exports = {
-    setupCitationsDatabase,
 	data: new Discord.SlashCommandBuilder()
 		.setName('citation')
 		.setDescription('Store or display a quote based on the given arguments.')
@@ -89,108 +90,138 @@ module.exports = {
     },
 };
 
-function storeImages(identifier, urls, interaction){
+async function storeImages(identifier, urls, interaction){
     let params = [];
     let id = String(identifier).toLowerCase();
     for (let url of urls){
         params.push(id);
         params.push(String(url));
     }
-    let sql = ('INSERT INTO citations(author, image) VALUES ' + ('(?, ?), '.repeat(urls.length))).slice(0, -2);
-    db.run(sql, params, (error)=>{
-        if (error){
-            console.log(error);
-            interaction.editReply("Erreur lors de l'enregistrement d'une image dans la DB.");
-        };
-    }, function(){
-        interaction.editReply("Ajouté " + this.changes + " citation(s) à la DB.");
-    });
+
+    let folder = quotationsFolder + id;
+    if (!fs.existsSync(folder)){
+        fs.mkdirSync(folder);
+    }
+
+    let nbFilesBefore = fs.readdirSync(folder).length;
+
+    for (let i = 0; i < urls.length; i++){
+        let nbFiles = fs.readdirSync(folder).length;
+        let extension = urls[i].split('.').pop().split('?')[0];
+        let path = folder + '/' + (nbFiles + 1) + '.' + extension;
+        await downloadFile(urls[i], path);
+    }
+
+    let nbFilesAfter = fs.readdirSync(folder).length;
+    if (nbFilesAfter > nbFilesBefore){
+        interaction.editReply("Ajouté " + (nbFilesAfter - nbFilesBefore) + " citation(s) à la DB.");
+    }
+    else{
+        interaction.editReply("Erreur lors de l'enregistrement d'une image dans la DB.");
+    }
 };
 
 async function sendImage(interaction, identifier, index){
-    db.all("SELECT image FROM citations WHERE author=?", [String(identifier).toLowerCase()], (error, rows) => {
-        if (error) throw error;
-        if (rows){
-            let urls = [];
-            rows.forEach((row)=>{
-                let url = row.image;
-                urls.push(url);
-            });
-            if (urls.length > 0){
-                let chosenIndex;
-                if (index != null){
-                    let indexAsNum = Number(index);
-                    if (Number.isInteger(indexAsNum) && indexAsNum >= 1 && indexAsNum <= urls.length) chosenIndex = indexAsNum;
-                    else return interaction.editReply('L\'index doit être compris entre 1 et ' + urls.length);
-                }
-                else chosenIndex = Math.floor(Math.random()*urls.length) + 1;
-                interaction.editReply({
-                    content: "Cet identifiant a " + urls.length + " citation(s) associée(s). Index actuel : " + chosenIndex,
-                    files: [{
-                        attachment: urls[chosenIndex - 1]
-                    }],
-                    components:[
-                        new Discord.ActionRowBuilder().addComponents(deleteButton)
-                    ]
-                }).then(() => {
-                    requestDeletion(interaction, identifier, urls[chosenIndex - 1]);
-                });
-            }
-            else return interaction.editReply("Il n'y a pas de citation associée à cet identifiant");
+    let id = String(identifier).toLowerCase();
+    let folder = quotationsFolder + id;
+    if (!fs.existsSync(folder)){
+        return interaction.editReply("Il n'y a pas de citation associée à cet identifiant");
+    }
+
+    let files = fs.readdirSync(folder);
+    if (files.length > 0){
+        let chosenIndex;
+        if (index != null){
+            let indexAsNum = Number(index);
+            if (Number.isInteger(indexAsNum) && indexAsNum >= 1 && indexAsNum <= files.length) chosenIndex = indexAsNum;
+            else return interaction.editReply('L\'index doit être compris entre 1 et ' + files.length);
         }
-        else return interaction.editReply("Il n'y a pas de citation associée à cet identifiant");
-    });
+        else chosenIndex = Math.floor(Math.random()*files.length) + 1;
+        let path = folder + '/' + chosenIndex + '.' + files[chosenIndex - 1].split('.').pop();
+        interaction.editReply({
+            content: "Cet identifiant a " + files.length + " citation(s) associée(s). Index actuel : " + chosenIndex,
+            files: [path],
+            components:[
+                new Discord.ActionRowBuilder().addComponents(deleteButton)
+            ]
+        }).then(() => {
+            requestDeletion(interaction, id, chosenIndex);
+        });
+    }
+    else return interaction.editReply("Il n'y a pas de citation associée à cet identifiant");
 }
 
 async function sendRandomImage(interaction){
-    db.all("SELECT author, image FROM citations", [], (error, rows) => {
-        if (error) throw error;
-        if (rows){
-            let urls = [];
-            let ids = [];
-            rows.forEach((row)=>{
-                ids.push(row.author);
-                urls.push(row.image);
-            });
-            if (urls.length > 0){
-                
-                let rdm = Math.floor(Math.random()*urls.length);
-                let randomUrl = urls[rdm];
-                let uniqueIds = [...new Set(ids.slice(0).sort())];
+    let folders = fs.readdirSync(quotationsFolder);
+    if (folders.length > 0){
+        let rdmFolder = Math.floor(Math.random()*folders.length);
+        let folder = folders[rdmFolder];
+        let files = fs.readdirSync(quotationsFolder + folder);
+        if (files.length > 0){
+            let rdm = Math.floor(Math.random()*files.length) + 1;
+            let path = quotationsFolder + folder + '/' + rdm + '.' + files[rdm - 1].split('.').pop();
 
-                interaction.editReply({
-                    content: urls.length + " citations sont enregistrées\nIdentifiants : " + uniqueIds.join(' ; '),
-                    files: [{
-                        attachment: randomUrl
-                    }],
-                    components:[
-                        new Discord.ActionRowBuilder().addComponents(deleteButton)
-                    ]
-                }).then(() => {
-                    requestDeletion(interaction, ids[rdm], randomUrl);
+            // get total number of citations
+            let total = 0;
+            let uniqueIds = [];
+            for (let folderIter of folders){
+                let name = folderIter.split('/').pop();
+                if (folderIter == folder) name += ' (actuel)';
+                uniqueIds.push(name);
+                let files = fs.readdirSync(quotationsFolder + folderIter);
+                total += files.length;
+            }
+
+            interaction.editReply({
+                content: total + " citations sont enregistrées.\nIdentifiants : " + uniqueIds.join(' ; '),
+                files: [path],
+                components:[
+                    new Discord.ActionRowBuilder().addComponents(deleteButton)
+                ]
+            }).then(() => {
+                requestDeletion(interaction, folder.split('/').pop(), rdm);
+            });
+        } 
+        else {
+            fs.rmdirSync(quotationsFolder + folder);
+            sendRandomImage(interaction);
+        }
+    }
+    else return interaction.editReply("Aucune citation n'est enregistrée");
+}
+
+async function deleteImage(confirmMessage, identifier, index){
+    let folder = quotationsFolder + identifier;
+    let files = fs.readdirSync(folder);
+    let path = folder + '/' + index + '.' + files[index - 1].split('.').pop();
+    fs.unlink(path, (error) => {
+        if (error){
+            console.log(error);
+            return confirmMessage.edit("Erreur lors de la suppression de la citation dans la DB.");
+        }
+
+        files = fs.readdirSync(folder);
+        if (files.length == 0){
+            fs.rmdirSync(folder);
+        }
+        else{
+            for (let i = index; i < files.length; i++){
+                let oldPath = folder + '/' + (i + 1) + '.' + files[i].split('.').pop();
+                let newPath = folder + '/' + i + '.' + files[i].split('.').pop();
+                fs.rename(oldPath, newPath, (error) => {
+                    if (error){
+                        console.log(error);
+                        return confirmMessage.edit("Erreur lors de la suppression de la citation dans la DB.");
+                    }
                 });
             }
-            else return interaction.editReply("Aucune citation n'est enregistrée");
         }
-        else return interaction.editReply("Aucune citation n'est enregistrée");
+
+        confirmMessage.edit("C'est bon chef, j'ai supprimé la citation de la DB.");
     });
 }
 
-async function deleteImage(confirmMessage, identifier, url){
-    db.run('DELETE FROM citations WHERE author=? AND image=?', [String(identifier).toLowerCase(), String(url)], 
-        (error)=>{
-            if (error){
-                console.log(error);
-            };
-        },
-        function (){
-            if (this.changes > 0) confirmMessage.edit("C'est bon chef, j'ai supprimé la citation de la DB.");
-            else confirmMessage.edit("Erreur lors de la suppression de la citation dans la DB.");
-        }
-    );
-}
-
-async function requestDeletion(interaction, identifier, url){
+async function requestDeletion(interaction, identifier, index){
     const filter = i => i.user.id === interaction.user.id && i.customId === 'deleteQuote';
 
     try {
@@ -198,14 +229,14 @@ async function requestDeletion(interaction, identifier, url){
         await response.awaitMessageComponent({ filter, time: 10000, max: 1 });
         const confirmMessage = await interaction.followUp({content: 'Êtes-vous sûr de vouloir supprimer cette citation ? (Répondez par "supprimer" pour confirmer, sinon je ne ferai rien)'})
             .catch(console.error);
-        await requestDeletionConfirmation(interaction, confirmMessage, identifier, url);
+        await requestDeletionConfirmation(interaction, confirmMessage, identifier, index);
     }
     catch (error) {
         await interaction.editReply({components: []});
     }
 }
 
-async function requestDeletionConfirmation(interaction, confirmMessage, identifier, url){
+async function requestDeletionConfirmation(interaction, confirmMessage, identifier, index){
     const filter = msg => msg.author.id === interaction.user.id;
 
     try{
@@ -213,23 +244,45 @@ async function requestDeletionConfirmation(interaction, confirmMessage, identifi
         const m = response.first();
         if (m.content.toLowerCase() == "supprimer"){
             m.delete();
-            await deleteImage(confirmMessage, identifier, url);
+            await deleteImage(confirmMessage, identifier, index);
         }
         else{
             confirmMessage.edit({content: "Ok je laisse couler, mais évite de missclick la prochaine fois... :sleeping:", components: []}).catch(console.error);
         }
     }
     catch (error){
-        confirmMessage.edit("Trop tard, je retourne à mes occupations :sleeping:");
+        console.error(error);
+        confirmMessage.edit("Trop tard, je retourne dormir :sleeping:");
     }
     await interaction.editReply({components: []}).catch(console.error);
 }
 
-function setupCitationsDatabase(){
-    db.run(
-		"CREATE TABLE IF NOT EXISTS citations (author text, image text NOT NULL)",
-		(e) => {
-			if (e) console.log(e);
-		}
-	);
+async function downloadFile(url, targetFile) { // copied from https://futurestud.io/tutorials/node-js-how-to-download-a-file
+    return await new Promise((resolve, reject) => {
+        https.get(url, response => {
+            const code = response.statusCode ?? 0
+    
+            if (code >= 400) {
+                return reject(new Error(response.statusMessage))
+            }
+    
+            // handle redirects
+            if (code > 300 && code < 400 && !!response.headers.location) {
+                return resolve(
+                    downloadFile(response.headers.location, targetFile)
+                )
+            }
+    
+            // save the file to disk
+            const fileWriter = fs
+                .createWriteStream(targetFile)
+                .on('finish', () => {
+                    resolve({})
+                })
+    
+            response.pipe(fileWriter)
+        }).on('error', error => {
+            reject(error)
+        })
+    })
 }
