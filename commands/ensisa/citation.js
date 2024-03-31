@@ -79,6 +79,7 @@ module.exports = {
 
         let identifier = interaction.options.getString('identifier');
         if (identifier) {
+            identifier = identifier.toLowerCase();
             let index = interaction.options.getInteger('index');
             if (index){
                 return sendImage(interaction, identifier, index);
@@ -137,7 +138,12 @@ async function sendImage(interaction, identifier, index){
             else return interaction.editReply('L\'index doit être compris entre 1 et ' + files.length);
         }
         else chosenIndex = Math.floor(Math.random()*files.length) + 1;
-        let path = folder + '/' + chosenIndex + '.' + files[chosenIndex - 1].split('.').pop();
+        let filesWithoutExtension = files.map(file => file.split('.').shift());
+        filesWithoutExtension.sort((a, b) => a - b);
+        // find the extension of the chosen file using its name
+        let fileWithoutExtension = filesWithoutExtension[chosenIndex - 1];
+        let file = files.find(file => file.split('.').shift() == fileWithoutExtension);
+        let path = folder + '/' + file;
         interaction.editReply({
             content: "Cet identifiant a " + files.length + " citation(s) associée(s). Index actuel : " + chosenIndex,
             files: [path],
