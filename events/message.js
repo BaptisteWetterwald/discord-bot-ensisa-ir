@@ -5,13 +5,14 @@ const reactionsByRole  = require('../json/reactionsByRole.json');
 const autoReplies  = require('../json/autoReplies.json');
 const { laughingWords }  = require('../json/laughingWords.json');
 const { leagueOfLegends } = require('../ids/channels-id.json');
+const { onReplyToBot } = require('../commands/fun/chadgpt');
 
 module.exports = {
 	name: Discord.Events.MessageCreate,
 	execute(message) {
         if (message.author.bot) return;
         if (message.content.endsWith("++") || message.content.endsWith("--")) return checkForAbsences(message);
-
+        onReplyToBot(message);
         emojiIfEndsWith(message);
         emojiIfLaughing(message);
         emojiIfLeagueOfLegends(message);
