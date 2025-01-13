@@ -177,7 +177,7 @@ async function fetchMarks(){
 	await page.waitForSelector('#username');
     await page.type('#username', email);
     await page.type('#password', password);
-    await page.click('button.mdc-button--raised:nth-child(1)'); // login
+    await page.click('#login-form-controls > button'); // login
 	await page.waitForNetworkIdle();
 
 	await page.goto('https://e-formation.uha.fr/course/view.php?id=8903&section=4'); // moodle page with the marks files
