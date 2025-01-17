@@ -2,9 +2,9 @@ const Discord = require('discord.js');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-const { getColor } = require('../../utils/randomColor.js');
-const {email, password} = require('../../json/login_uha.json');
-const keysByRole = require('../../json/edt_keysByRole.json');
+const { getColor } = require('../utils/randomColor.js');
+const {email, password} = require('../json/login_uha.json');
+const keysByRole = require('../json/edt_keysByRole.json');
 
 module.exports = {
     updateAllEDT,
